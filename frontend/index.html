@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Analyzer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="background-elements">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h2>AI Analyzer</h2>
+        </div>
+        <ul class="nav-links">
+            <li class="active" data-target="view-analyzer">
+                <span>📄 Resume Analyzer</span>
+            </li>
+            <li data-target="view-feedback">
+                <span>💬 Feedback</span>
+            </li>
+            <li data-target="view-admin">
+                <span>🔐 Admin Panel</span>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <div class="theme-toggle" style="margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                <label class="theme-switch">
+                    <input type="checkbox" id="theme-toggle-btn">
+                    <span class="slider"></span>
+                </label>
+                <span id="theme-label" style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">Dark Mode</span>
+            </div>
+            <p>Built with 🤍</p>
+        </div>
+    </nav>
+
+    <div class="content-wrapper">
+        <main class="container">
+            
+            <!-- ANALYZER VIEW -->
+            <div id="view-analyzer" class="view active">
+                <header>
+                    <h1>AI <span>Resume Analyzer</span></h1>
+                    <p>Upload your resume to get smart recommendations and insights.</p>
+                </header>
+
+                <section id="upload-section" class="glass-panel">
+                    <div id="drop-zone" class="drop-zone">
+                        <div class="upload-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        </div>
+                        <h3>Drag & Drop your Resume here</h3>
+                        <p>or</p>
+                        <input type="file" id="file-input" accept=".pdf" hidden>
+                        <button id="browse-btn" class="btn-primary">Browse Files</button>
+                        <p class="supported-formats">Supported formats: PDF</p>
+                    </div>
+                    <div id="loading" class="loading-state hidden">
+                        <div class="spinner"></div>
+                        <p>Analyzing your resume... Cooking some magic! 🪄</p>
+                    </div>
+                </section>
+
+                <section id="dashboard" class="dashboard hidden">
+                    <div class="header-action">
+                        <h2>Analysis Results</h2>
+                        <button id="new-analysis-btn" class="btn-secondary">Analyze Another</button>
+                    </div>
+                    
+                    <div class="grid-layout">
+                        <!-- Basic Info Card -->
+                        <div class="glass-panel card profile-card">
+                            <h3>Basic Info 👀</h3>
+                            <div class="info-list">
+                                <div class="info-item">
+                                    <span class="label">Name</span>
+                                    <span class="value" id="res-name">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">Email</span>
+                                    <span class="value" id="res-email">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">Mobile</span>
+                                    <span class="value" id="res-mobile">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">Pages</span>
+                                    <span class="value" id="res-pages">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">Experience Level</span>
+                                    <span class="value badge" id="res-level">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Score Card -->
+                        <div class="glass-panel card score-card">
+                            <h3>Resume Score 📝</h3>
+                            <div class="score-container">
+                                <div class="score-circle">
+                                    <svg viewBox="0 0 36 36" class="circular-chart">
+                                        <path class="circle-bg"
+                                            d="M18 2.0845
+                                            a 15.9155 15.9155 0 0 1 0 31.831
+                                            a 15.9155 15.9155 0 0 1 0 -31.831"
+                                        />
+                                        <path class="circle" id="score-circle-path"
+                                            stroke-dasharray="0, 100"
+                                            d="M18 2.0845
+                                            a 15.9155 15.9155 0 0 1 0 31.831
+                                            a 15.9155 15.9155 0 0 1 0 -31.831"
+                                        />
+                                        <text x="18" y="20.35" class="percentage" id="res-score">0</text>
+                                    </svg>
+                                </div>
+                            </div>
+                            <p class="score-note">Score based on presence of essential sections (Objective, Experience, Skills, etc.)</p>
+                        </div>
+
+                        <!-- Job Recommendation Card -->
+                        <div class="glass-panel card full-width">
+                            <h3>Career Insight 💡</h3>
+                            <div class="insight-box">
+                                <p>Based on our analysis, your profile aligns with:</p>
+                                <h4 class="neon-text" id="res-field">-</h4>
+                            </div>
+                        </div>
+
+                        <!-- Skills Card -->
+                        <div class="glass-panel card">
+                            <h3>Your Current Skills</h3>
+                            <div class="tags-container" id="current-skills"></div>
+                        </div>
+
+                        <!-- Recommended Skills Card -->
+                        <div class="glass-panel card highlight-card">
+                            <h3>Recommended Skills to Learn 🚀</h3>
+                            <p class="subtext">Adding these skills will boost your chances of getting a job!</p>
+                            <div class="tags-container recommended" id="recommended-skills"></div>
+                        </div>
+
+                        <!-- Course Recommendations -->
+                        <div class="glass-panel card full-width" id="courses-container">
+                            <h3>Courses & Certificates Recommendations 👨‍🎓</h3>
+                            <ul class="course-list" id="course-list"></ul>
+                        </div>
+
+                        <!-- Bonus Videos -->
+                        <div class="glass-panel card full-width hidden" id="video-container">
+                            <h3>Bonus Videos 💡</h3>
+                            <div class="video-grid">
+                                <div>
+                                    <h4>Resume Writing Tips</h4>
+                                    <iframe id="vid-resume" width="100%" height="250" frameborder="0" allowfullscreen></iframe>
+                                </div>
+                                <div>
+                                    <h4>Interview Tips</h4>
+                                    <iframe id="vid-interview" width="100%" height="250" frameborder="0" allowfullscreen></iframe>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+            </div>
+
+            <!-- FEEDBACK VIEW -->
+            <div id="view-feedback" class="view hidden">
+                <header>
+                    <h1>User <span>Feedback</span></h1>
+                    <p>Help us improve by leaving your thoughts!</p>
+                </header>
+
+                <div class="grid-layout">
+                    <div class="glass-panel card">
+                        <h3>Submit Feedback</h3>
+                        <form id="feedback-form" class="custom-form">
+                            <div class="form-group">
+                                <label>Name</label>
+                                <input type="text" id="feed-name" required placeholder="John Doe">
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="feed-email" required placeholder="john@example.com">
+                            </div>
+                            <div class="form-group">
+                                <label>Rating (1-5)</label>
+                                <input type="number" id="feed-score" min="1" max="5" value="5" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Comments</label>
+                                <textarea id="feed-comments" rows="4" placeholder="Great tool!"></textarea>
+                            </div>
+                            <button type="submit" class="btn-primary">Submit Feedback</button>
+                        </form>
+                    </div>
+                    
+                    <div class="glass-panel card">
+                        <h3>Overall Ratings</h3>
+                        <div class="chart-container">
+                            <canvas id="public-ratings-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN VIEW -->
+            <div id="view-admin" class="view hidden">
+                <header>
+                    <h1>Admin <span>Dashboard</span></h1>
+                </header>
+
+                <!-- Admin Login -->
+                <div id="admin-login-section" class="glass-panel card profile-card" style="max-width: 400px; margin: 0 auto;">
+                    <h3>Admin Login</h3>
+                    <form id="admin-login-form" class="custom-form">
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" id="admin-user" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="admin-pass" required>
+                        </div>
+                        <button type="submit" class="btn-primary" style="width: 100%;">Login</button>
+                    </form>
+                    <p id="admin-error" class="error-text hidden">Invalid credentials</p>
+                </div>
+
+                <!-- Admin Dashboard Data -->
+                <div id="admin-dashboard-section" class="hidden">
+                    <div class="header-action">
+                        <h2 id="admin-welcome">Welcome Admin!</h2>
+                        <button id="download-csv-btn" class="btn-secondary">Download Report (CSV)</button>
+                    </div>
+                    
+                    <!-- Charts Grid -->
+                    <div class="grid-layout admin-charts" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 2rem;">
+                        <div class="glass-panel card"><canvas id="chart-roles"></canvas></div>
+                        <div class="glass-panel card"><canvas id="chart-experience"></canvas></div>
+                        <div class="glass-panel card"><canvas id="chart-geo"></canvas></div>
+                        <div class="glass-panel card"><canvas id="chart-scores"></canvas></div>
+                    </div>
+
+                    <!-- Data Table -->
+                    <div class="glass-panel card full-width table-container">
+                        <h3>User Data</h3>
+                        <div class="table-scroll">
+                            <table id="admin-user-table" class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Timestamp</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Score</th>
+                                        <th>Level</th>
+                                        <th>Field</th>
+                                        <th>Location</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-panel card full-width table-container" style="margin-top: 2rem;">
+                        <h3>Feedback Data</h3>
+                        <div class="table-scroll">
+                            <table id="admin-feed-table" class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Timestamp</th>
+                                        <th>Name</th>
+                                        <th>Score</th>
+                                        <th>Comments</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
